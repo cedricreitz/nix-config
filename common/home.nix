@@ -11,6 +11,19 @@
       size = 24;
     };
 
+    gtk = {
+      enable = true;
+
+      theme = {
+        package = pkgs.graphite-gtk-theme;
+        name = "Graphite-Dark";
+      };
+
+      iconTheme = {
+        package = pkgs.catppuccin-papirus-folders;
+        name = "Papirus-Dark";
+      };  
+    };
     programs.git = {
         enable = true;
         userName  = "Cedric Reitz";
