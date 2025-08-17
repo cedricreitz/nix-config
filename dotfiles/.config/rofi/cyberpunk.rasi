@@ -18,7 +18,7 @@ window {
     x-offset:       0px;               /* centered horizontally */
     y-offset:       0px;               /* centered vertically */
     border-radius:  20px;              /* smoother corners */
-    background-color: rgba(8, 8, 8, 0.75);  /* 75% opaque */
+    background-color: rgba(8, 8, 8, 0.3);  /* 75% opaque */
 }
 
 
