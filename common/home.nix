@@ -79,6 +79,10 @@
       source = ../dotfiles/.config/waybar;
       recursive = true;
     };
+    home.file.".config/pictures" = {
+      source = ../dotfiles/.config/pictures;
+      recursive = true;
+    };
     home.file.".vscode/argv.json" = {
       source = ../dotfiles/.vscode/argv.json;
     };
