@@ -2,7 +2,8 @@
 {
   imports =
     [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
+      /etc/nixos/hardware-configuration.nix
+      ./home.nix
     ];
   boot = {
     initrd.systemd.enable = true;
@@ -70,6 +71,7 @@
     enable = true;
     withUWSM = true;
   };
+  services.gnome.gnome-keyring.enable = true;
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.zsh;
   nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
@@ -95,6 +97,7 @@
     zoxide
     lsd
     bat
+    seahorse
     xfce.thunar
     gtk-engine-murrine
     hyprpolkitagent
