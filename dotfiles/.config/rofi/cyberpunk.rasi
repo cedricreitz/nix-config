@@ -3,7 +3,7 @@ configuration {
 }
 
 * {
-    background-color: rgba(8, 8, 8, 0.75);
+    background-color: transparent;
     text-color:       #FF003C;
     margin:           0px;
     padding:          0px;
@@ -18,7 +18,7 @@ window {
     x-offset:       0px;
     y-offset:       0px;
     border-radius:  20px;
-    background-color: rgba(8, 8, 8, 0.3);
+    background-color: rgba(8, 8, 8, 0.33);
 }
 
 
