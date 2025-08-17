@@ -7,6 +7,7 @@
         "vscode"
         "google-chrome"
         "discord"
+        "notion-app"
     ];
     environment.systemPackages = with pkgs; [
         #desktop experience
