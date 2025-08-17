@@ -13,12 +13,12 @@ configuration {
 window {
     location:       center;
     anchor:         center;
-    width:          600px;             /* wider, but not full screen */
-    height:         300px;             /* shorter height */
-    x-offset:       0px;               /* centered horizontally */
-    y-offset:       0px;               /* centered vertically */
-    border-radius:  20px;              /* smoother corners */
-    background-color: rgba(8, 8, 8, 0.3);  /* 75% opaque */
+    width:          600px;
+    height:         280px;
+    x-offset:       0px;
+    y-offset:       0px;
+    border-radius:  20px;
+    background-color: rgba(8, 8, 8, 0.3);
 }
 
 
