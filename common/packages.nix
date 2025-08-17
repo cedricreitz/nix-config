@@ -50,6 +50,6 @@
         vscode
         discord
         google-chrome
-        notion-app-enhancer
+        notion-app-enhanced
     ];
 }
