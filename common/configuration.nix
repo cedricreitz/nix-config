@@ -1,9 +1,9 @@
 { config, pkgs, lib, ... }:
 {
   imports =
-    [ # Include the results of the hardware scan.
-      /etc/nixos/hardware-configuration.nix
-      ./home.nix
+    [ 
+      ./common/packages.nix
+      ./common/home.nix
     ];
   boot = {
     initrd.systemd.enable = true;
@@ -37,7 +37,7 @@
 
   };
   xdg.portal.enable = true;
-  networking.hostName = "lenovop14s";
+  
   networking.networkmanager.enable = true;
   time.timeZone = "Europe/Berlin";
   i18n.defaultLocale = "de_DE.UTF-8";
@@ -66,65 +66,18 @@
   };
   services.getty.autologinUser = "cedricreitz";
   security.sudo.wheelNeedsPassword = false;
-  programs.git.enable = true;
   programs.hyprland = {
     enable = true;
     withUWSM = true;
   };
   services.gnome.gnome-keyring.enable = true;
-  programs.zsh.enable = true;
   users.defaultUserShell = pkgs.zsh;
-  nixpkgs.config.allowUnfreePredicate = pkg: builtins.elem (lib.getName pkg) [
-    "1password-gui"
-    "1password"
-    "1password-cli"
-    "vscode"
-    "google-chrome"
-    "discord"
-    "apple_cursor"
-  ];
 
-  environment.systemPackages = with pkgs; [
-    kitty
-    hyprlock
-    waybar
-    hyprpaper
-    swaynotificationcenter
-    vscode
-    apple-cursor
-    nwg-look
-    rofi-wayland
-    zoxide
-    lsd
-    bat
-    seahorse
-    xfce.thunar
-    gtk-engine-murrine
-    hyprpolkitagent
-    google-chrome
-    discord
-    graphite-gtk-theme
-    plymouth
-    catppuccin-papirus-folders
-    kdePackages.qtwayland
-    libsForQt5.qtwayland
-    kdePackages.qt6ct
-    libsForQt5.qt5ct           
-    xcursor-pro
-    goxlr-utility
-    materia-kde-theme
-    ranger
-    unzip
-    python314
-    lzip
-  ];
-  
+  services.fprintd.enable = true;
   systemd.services.fprintd = {
     wantedBy = [ "multi-user.target" ];
     serviceConfig.Type = "simple";
   };
-
-  services.fprintd.enable = true;
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
@@ -132,6 +85,7 @@
     liberation_ttf
     cantarell-fonts
   ];
+
   security.polkit.enable = true;
   programs._1password.enable = true;
   programs._1password-gui = {
@@ -145,16 +99,5 @@
     alsa.enable = true;
     pulse.enable = true;
   };
-
-  # Enable the OpenSSH daemon.
-  # services.openssh.enable = true;
-
-  # Open ports in the firewall.
-  # networking.firewall.allowedTCPPorts = [ ... ];
-  # networking.firewall.allowedUDPPorts = [ ... ];
-  # Or disable the firewall altogether.
-  # networking.firewall.enable = false;
-
   system.stateVersion = "25.05";
-
 }
