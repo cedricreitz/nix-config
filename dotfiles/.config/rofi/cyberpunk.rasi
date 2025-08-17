@@ -36,12 +36,9 @@ inputbar {
     children:         [ entry ];
 }
 
-prompt {
-    text-color: #FCEE09;
-}
 
 entry {
-    placeholder:        "Looking For Someting?";
+    placeholder:        "...";
     placeholder-color:  #FCEE09;
 }
 
@@ -73,13 +70,13 @@ element {
 element normal active,
 element alternate active {
     text-color:       #00F0FF;
-    background-color: #090909;
+    background-color: rgba(9, 9, 9, 0.6);
     border:           1px;
 }
 
 element selected normal,
 element selected active {
-    background-color: #090909;
+    background-color: rgba(9, 9, 9, 0.6);
     border:           2px;
     border-color:     #00F0FF;
     text-color:       #00F0FF;
