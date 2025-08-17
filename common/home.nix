@@ -6,9 +6,9 @@
 
     home.pointerCursor = {
       gtk.enable = true;
-      package = pkgs.apple-cursor;
-      name = "Apple Cursor";
-      size = 22;
+      package = pkgs.adwaita-icon-theme;
+      name = "Adwaita";
+      size = 24;
     };
 
     programs.git = {
