@@ -18,7 +18,7 @@ window {
     x-offset:       0px;
     y-offset:       0px;
     border-radius:  20px;
-    background-color: rgba(8, 8, 8, 0.8);
+    background-color: rgba(8, 8, 8, 0.25);
 }
 
 
@@ -27,7 +27,7 @@ mainbox {
 }
 
 inputbar {
-    background-color: #090909;
+    background-color: rgba(9, 9, 9, 0.6);
     border-color:     #00F0FF;
     border:           2px;
     border-radius:    15px;
@@ -57,7 +57,7 @@ textbox {
 }
 
 listview {
-    background-color: rgba(8, 8, 8, 0.25);
+    background-color: listview;
     margin:           10px 0 0;
     lines:            10;
     columns:          1;
