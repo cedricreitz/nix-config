@@ -11,14 +11,16 @@ configuration {
 }
 
 window {
-    location:       west;
-    x-offset:       10px;
-    width:          380px;
-    height:         100%;
-    y-offset:       -100px;
-    border-radius:  15px;
-    background-color: rgba(8, 8, 8, 0.75);
+    location:       center;
+    anchor:         center;
+    width:          600px;             /* wider, but not full screen */
+    height:         300px;             /* shorter height */
+    x-offset:       0px;               /* centered horizontally */
+    y-offset:       0px;               /* centered vertically */
+    border-radius:  20px;              /* smoother corners */
+    background-color: rgba(8, 8, 8, 0.75);  /* 75% opaque */
 }
+
 
 mainbox {
     padding: 5px;
