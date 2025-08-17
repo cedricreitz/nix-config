@@ -59,6 +59,12 @@
       source = ../dotfiles/.config/waybar;
       recursive = true;
     };
+    home.file.".vscode/argv.json" = {
+      source = ../dotfiles/.vscode/argv.json;
+    };
+    home.file.".config/Code/User/settings.json" = {
+      source = ../dotfiles/.config/Code/User/settings.json;
+    };
 
   };
 }
