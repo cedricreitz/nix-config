@@ -18,7 +18,7 @@ window {
     x-offset:       0px;
     y-offset:       0px;
     border-radius:  20px;
-    background-color: transparent;
+    background-color: rgba(8, 8, 8, 0.8);
 }
 
 
@@ -57,7 +57,7 @@ textbox {
 }
 
 listview {
-    background-color: transparent;
+    background-color: rgba(8, 8, 8, 0.25);
     margin:           10px 0 0;
     lines:            10;
     columns:          1;
