@@ -5,6 +5,7 @@
       ./packages.nix
       ./home.nix
     ];
+    
   boot = {
     initrd.systemd.enable = true;
     kernelPackages = pkgs.linuxPackages_zen;
