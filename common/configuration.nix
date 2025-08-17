@@ -2,8 +2,8 @@
 {
   imports =
     [ 
-      ./common/packages.nix
-      ./common/home.nix
+      ./packages.nix
+      ./home.nix
     ];
   boot = {
     initrd.systemd.enable = true;

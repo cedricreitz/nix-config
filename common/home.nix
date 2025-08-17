@@ -20,7 +20,7 @@
         theme = "powerlevel10k/powerlevel10k";
       };
       shellAliases = {
-        update = "sudo nixos-rebuild switch";
+        update = "sudo nixos-rebuild switch --flake ~/repos/nix-config#lenovop14s";
         ls = "lsd";
         cat = "bat";
         cd = "z";
