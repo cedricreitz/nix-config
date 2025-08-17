@@ -7,7 +7,7 @@
     home.pointerCursor = {
       gtk.enable = true;
       package = pkgs.apple-cursor;
-      name = "Bibata-Modern-Ice";
+      name = "Apple Cursor";
       size = 22;
     };
 

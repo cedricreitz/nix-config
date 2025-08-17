@@ -7,7 +7,6 @@
         "vscode"
         "google-chrome"
         "discord"
-        "apple_cursor"
     ];
     environment.systemPackages = with pkgs; [
         #desktop experience
@@ -19,7 +18,7 @@
         swaynotificationcenter
         hyprpolkitagent
         nwg-look
-        apple-cursor
+        adwaita-icon-theme
         xfce.thunar
         graphite-gtk-theme
         gtk-engine-murrine
