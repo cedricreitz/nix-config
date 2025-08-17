@@ -71,6 +71,7 @@
     withUWSM = true;
   };
   services.gnome.gnome-keyring.enable = true;
+  programs.zsh.enable = true;
   users.defaultUserShell = pkgs.zsh;
 
   services.fprintd.enable = true;

@@ -10,38 +10,46 @@
         "apple_cursor"
     ];
     environment.systemPackages = with pkgs; [
+        #desktop experience
         kitty
+        hyprpaper
         hyprlock
         waybar
-        hyprpaper
-        swaynotificationcenter
-        vscode
-        apple-cursor
-        nwg-look
         rofi-wayland
-        zoxide
-        lsd
-        seahorse
-        xfce.thunar
-        gtk-engine-murrine
+        swaynotificationcenter
         hyprpolkitagent
-        google-chrome
-        discord
+        nwg-look
+        apple-cursor
+        xfce.thunar
         graphite-gtk-theme
-        plymouth
+        gtk-engine-murrine
         catppuccin-papirus-folders
         kdePackages.qtwayland
         libsForQt5.qtwayland
         kdePackages.qt6ct
         libsForQt5.qt5ct           
-        xcursor-pro
-        goxlr-utility
         materia-kde-theme
-        ranger
-        unzip
-        python314
-        lzip
-    ];
 
-    programs.zsh.enable = true;
+        #terminal experience
+        zoxide
+        lsd
+        zsh-powerlevel10k
+        zsh-autosuggestions
+        zsh-syntax-highlighting
+
+        #utility
+        seahorse
+        plymouth
+        goxlr-utility
+
+        #generics
+        python314
+        unzip
+        lzip
+
+        #programs
+        vscode
+        discord
+        google-chrome
+    ];
 }
