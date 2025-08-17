@@ -39,7 +39,6 @@ inputbar {
 
 entry {
     placeholder:        "...";
-    placeholder-color:  #FCEE09;
 }
 
 message {
