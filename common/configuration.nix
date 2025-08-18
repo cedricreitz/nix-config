@@ -5,6 +5,7 @@
       ./packages.nix
       ./home.nix
     ];
+  system.stateVersion = "25.05";
     
   boot = {
     initrd.systemd.enable = true;
@@ -29,16 +30,16 @@
       "vt.default_red=30,243,166,249,137,245,148,186,88,243,166,249,137,245,148,166"
       "vt.default_grn=30,139,227,226,180,194,226,194,91,139,227,226,180,194,226,173"
       "vt.default_blu=46,168,161,175,250,231,213,222,112,168,161,175,250,231,213,200"
-      "binder.devices=binder,hwbinder,vndbinder"
+      "psi=1"
+      "systemd.unified_cgroup_hierarchy=1"
     ];
     loader.timeout = 0;
   
     loader.systemd-boot.enable = true;
     loader.efi.canTouchEfiVariables = true;
-
   };
-  xdg.portal.enable = true;
   
+  xdg.portal.enable = true;
   networking.networkmanager.enable = true;
   time.timeZone = "Europe/Berlin";
   i18n.defaultLocale = "de_DE.UTF-8";
@@ -54,23 +55,28 @@
     LC_TELEPHONE = "de_DE.UTF-8";
     LC_TIME = "de_DE.UTF-8";
   };
+  
   services.xserver.xkb = {
     layout = "de";
     variant = "";
   };
   console.keyMap = "de";
+  
   users.users.cedricreitz = {
     isNormalUser = true;
     description = "Cedric Reitz";
-    extraGroups = [ "networkmanager" "wheel" ];
+    extraGroups = [ "networkmanager" "wheel" "lxd" ];
     packages = with pkgs; [];
   };
+  
   services.getty.autologinUser = "cedricreitz";
   security.sudo.wheelNeedsPassword = false;
+  
   programs.hyprland = {
     enable = true;
     withUWSM = true;
   };
+  
   services.gnome.gnome-keyring.enable = true;
   programs.zsh.enable = true;
   users.defaultUserShell = pkgs.zsh;
@@ -101,5 +107,9 @@
     alsa.enable = true;
     pulse.enable = true;
   };
-  system.stateVersion = "25.05";
+  
+  virtualisation = {
+    waydroid.enable = true;
+    lxc.enable = true;
+  };
 }

@@ -40,6 +40,8 @@
         seahorse
         plymouth
         goxlr-utility
+        wl-clipboard
+        fastfetch
 
         #generics
         python314
@@ -50,5 +52,6 @@
         vscode
         discord
         google-chrome
+        waydroid
     ];
 }
