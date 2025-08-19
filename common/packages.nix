@@ -42,6 +42,7 @@
         goxlr-utility
         wl-clipboard
         fastfetch
+        networkmanagerapplet
 
         #generics
         python3Packages.python
