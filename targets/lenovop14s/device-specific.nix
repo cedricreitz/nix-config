@@ -1,4 +1,4 @@
-{ config, pkgs, lib, inputs.self.nixosModules.xmm7360, ... }:
+{ config, pkgs, lib, ... }:
 {
   networking.hostName = "lenovop14s";
   environment.systemPackages = with pkgs; [
