@@ -11,6 +11,10 @@
     let
       system = "x86_64-linux";
     in {
+      # WWAN special setup
+      packages.x86_64-linux.xmm7360-pci = nixpkgs.legacyPackages.x86_64-linux.callPackage ./pkgs/xmm7360-pci {};
+      nixosModules.xmm7360 = import ./modules/xmm7360.nix;
+
       nixosConfigurations = {
         lenovop14s = nixpkgs.lib.nixosSystem {
           inherit system;
@@ -19,6 +23,7 @@
             ./targets/lenovop14s/device-specific.nix
             ./targets/lenovop14s/hardware-configuration.nix
             home-manager.nixosModules.home-manager
+            self.nixosModules.xmm7360
           ];
         };
 

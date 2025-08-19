@@ -44,7 +44,9 @@
         fastfetch
 
         #generics
-        python314
+        python313
+        python313Packages.pyroute2
+        python313Packages.configargparse
         unzip
         lzip
 
