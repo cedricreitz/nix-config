@@ -1,4 +1,4 @@
-{ lib, stdenv, fetchFromGitHub, kernel, kmod, python3Packages, linuxPackages }:
+{ lib, stdenv, fetchFromGitHub, kernel, kmod, python3Packages, linuxPackages, makeWrapper }:
 
 stdenv.mkDerivation rec {
   pname = "xmm7360-pci-spat";
@@ -8,23 +8,22 @@ stdenv.mkDerivation rec {
     owner = "SimPilotAdamT";
     repo = "xmm7360-pci-spat";
     rev = "master";
-    sha256 = "sha256-T+yJqHzf5gj8r/z4MrN+ZBDr2kfUNEVZEf3eFvGcJKg="; # The hash you got earlier
+    sha256 = "sha256-T+yJqHzf5gj8r/z4MrN+ZBDr2kfUNEVZEf3eFvGcJKg=";
   };
 
-  nativeBuildInputs = [ kmod ];
-  buildInputs = [ 
+  nativeBuildInputs = [ kmod makeWrapper ];
+  buildInputs = [
     kernel.dev
-    python3Packages.python
     python3Packages.pyserial
     python3Packages.configargparse
     python3Packages.pyroute2
+    python3Packages.dbus-python
   ];
 
   postPatch = ''
     # Add kernel version compatibility header
     sed -i '1i#include <linux/version.h>' xmm7360.c
-    
-    # Fix hrtimer API for kernel 6.16+
+
     # Fix hrtimer API for kernel 6.16+
     sed -i '/hrtimer_init(&xn->deadline, CLOCK_MONOTONIC, HRTIMER_MODE_REL);/c\
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0)\
@@ -33,11 +32,11 @@ stdenv.mkDerivation rec {
 \thrtimer_init(&xn->deadline, CLOCK_MONOTONIC, HRTIMER_MODE_REL);\
 \txn->deadline.function = xmm7360_net_deadline_cb;\
 #endif' xmm7360.c
-    if [ -f xmm7360.ini.sample ]; then
-      substituteInPlace xmm7360.ini.sample \
-        --replace "o2.internet" "internet" \
-        --replace "O2" "Generic Provider"
-    fi
+  
+   # Patch the source tree (not the install path)
+  for f in rpc/*.py; do
+    substituteInPlace "$f" --replace "/etc/xmm7360" "/etc/xmm7360/xmm7360.ini"
+  done
   '';
 
   makeFlags = [
@@ -53,25 +52,31 @@ stdenv.mkDerivation rec {
 
   installPhase = ''
     runHook preInstall
-    
+
     # Install kernel module
     mkdir -p $out/lib/modules/${kernel.modDirVersion}/extra
     cp *.ko $out/lib/modules/${kernel.modDirVersion}/extra/
-    
+
     # Install Python utilities and RPC tools
     mkdir -p $out/lib/xmm7360-spat
     cp -r rpc $out/lib/xmm7360-spat/ 2>/dev/null || true
     cp *.py $out/lib/xmm7360-spat/ 2>/dev/null || true
-    
-    # Install configuration files
-    mkdir -p $out/etc/xmm7360
-    if [ -f xmm7360.ini.sample ]; then
-      cp xmm7360.ini.sample $out/etc/xmm7360/xmm7360.ini.example
-    fi
-    
-    # Create wrapper scripts
+
+    # Create wrapper scripts for RPC utilities
     mkdir -p $out/bin
-    
+    for f in $out/lib/xmm7360-spat/rpc/*.py; do
+      scriptname=$(basename "$f" .py)
+      makeWrapper ${python3Packages.python.interpreter} $out/bin/xmm7360-$scriptname \
+        --add-flags "$f" \
+        --prefix PYTHONPATH : "${python3Packages.makePythonPath [ 
+          python3Packages.pyserial 
+          python3Packages.configargparse 
+          python3Packages.pyroute2
+          python3Packages.dbus-python
+        ]}"
+    done
+
+    # Add status helper
     cat > $out/bin/xmm7360-status << 'EOF'
 #!/usr/bin/env bash
 echo "=== XMM7360 Cellular Modem Status ==="
@@ -110,7 +115,7 @@ else
 fi
 EOF
     chmod +x $out/bin/xmm7360-status
-    
+
     runHook postInstall
   '';
 
