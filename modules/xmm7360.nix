@@ -3,110 +3,147 @@
 with lib;
 
 let
-  cfg = config.services.xmm7360;
-  xmm7360-pci = config.boot.kernelPackages.callPackage ../pkgs/xmm7360-pci {};
+  cfg = config.hardware.cellular.xmm7360;
+  
+  configFile = pkgs.writeText "xmm7360.ini" ''
+[xmm7360]
+apn=${cfg.apn}
+${optionalString (cfg.username != "") "username=${cfg.username}"}
+${optionalString (cfg.password != "") "password=${cfg.password}"}
+${optionalString (cfg.authType != "") "auth=${cfg.authType}"}
+
+# Network interface configuration
+interface=wwan0
+metric=${toString cfg.metric}
+
+# Modem configuration
+${cfg.extraConfig}
+  '';
+
 in {
-  options.services.xmm7360 = {
-    enable = mkEnableOption "XMM7360 PCI cellular modem driver";
-    
+  options.hardware.cellular.xmm7360 = {
+    enable = mkEnableOption "Intel XMM7360 cellular modem support";
+
+    package = mkOption {
+      type = types.package;
+      default = pkgs.xmm7360-pci-spat;
+      description = "The xmm7360-pci-spat package to use";
+    };
+
     apn = mkOption {
       type = types.str;
       default = "internet";
-      description = "APN for O2 Germany (postpaid: 'internet', prepaid: 'pinternet.interkom.de')";
+      example = "internet";
+      description = ''
+        Access Point Name (APN) for your cellular provider.
+        Common APNs:
+        - Generic: "internet"
+        - T-Mobile: "fast.t-mobile.com"
+        - Verizon: "vzwinternet"
+        - AT&T: "broadband"
+        - Vodafone: "internet.vodafone.net"
+        - O2: "o2.internet"
+      '';
     };
-    
-    autoConnect = mkOption {
+
+    username = mkOption {
+      type = types.str;
+      default = "";
+      description = "Username for cellular connection (if required by provider)";
+    };
+
+    password = mkOption {
+      type = types.str;
+      default = "";
+      description = "Password for cellular connection (if required by provider)";
+    };
+
+    authType = mkOption {
+      type = types.enum [ "" "pap" "chap" "both" ];
+      default = "";
+      description = "Authentication type (leave empty for auto-detection)";
+    };
+
+    metric = mkOption {
+      type = types.int;
+      default = 700;
+      description = "Network metric for the cellular interface (higher = lower priority)";
+    };
+
+    autoStart = mkOption {
       type = types.bool;
-      default = true;
-      description = "Automatically connect to cellular network on boot";
+      default = false;
+      description = "Automatically start the cellular connection on boot";
+    };
+
+    extraConfig = mkOption {
+      type = types.lines;
+      default = "";
+      description = "Additional configuration options for xmm7360.ini";
     };
   };
 
   config = mkIf cfg.enable {
-    # Add kernel module
-    boot.extraModulePackages = [ xmm7360-pci ];
+    # Add the package to system packages
+    environment.systemPackages = [ cfg.package ];
+
+    # Load the kernel module
     boot.kernelModules = [ "xmm7360" ];
-    
-    # Python dependencies for userspace tools
-    environment.systemPackages = with pkgs; [
-      xmm7360-pci
-      python3Packages.pyroute2
-      python3Packages.configargparse
-    ];
-    
-  # In modules/xmm7360.nix, replace the udev rules section with:
-  services.udev.extraRules = ''
-    # XMM7360 modem device permissions for NetworkManager
-    SUBSYSTEM=="tty", ATTRS{idVendor}=="8086", ATTRS{idProduct}=="7360", GROUP="networkmanager", MODE="0660"
-    KERNEL=="ttyXMM*", GROUP="networkmanager", MODE="0660"
-    SUBSYSTEM=="net", ATTRS{idVendor}=="8086", ATTRS{idProduct}=="7360", GROUP="networkmanager", MODE="0660"
-    SUBSYSTEM=="wwan", ATTRS{idVendor}=="8086", ATTRS{idProduct}=="7360", GROUP="networkmanager", MODE="0660"
-  '';
-    
-    # NetworkManager configuration for cellular
-    networking.networkmanager = {
-      enable = true;
-      settings = {
-        # O2 Germany specific settings
-        connection = {
-          "ipv6.addr-gen-mode" = "stable-privacy";
-          "ipv6.ip6-privacy" = "2";
-        };
-      };
-    };
-    
-    # Create NetworkManager connection profile for O2 Germany
-    environment.etc."NetworkManager/system-connections/MobileBroadband.nmconnection" = mkIf cfg.autoConnect {
-      text = ''
-        [connection]
-        id=MobileBroadband
-        type=gsm
-        autoconnect=true
-        autoconnect-priority=1
+    boot.extraModulePackages = [ cfg.package ];
 
-        [gsm]
-        apn=${cfg.apn}
-        number=*99#
+    # Create configuration file
+    environment.etc."xmm7360/xmm7360.ini".source = configFile;
 
-        [serial]
-        baud=115200
+    # Add udev rules for device permissions
+    services.udev.extraRules = ''
+      # XMM7360 cellular modem
+      SUBSYSTEM=="wwan", KERNEL=="wwan*", GROUP="networkmanager", MODE="0664"
+      SUBSYSTEM=="tty", KERNEL=="ttyXMM*", GROUP="networkmanager", MODE="0664"
+      
+      # Auto-load module when device is detected
+      ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x7360", RUN+="${pkgs.kmod}/bin/modprobe xmm7360"
+    '';
 
-        [ipv4]
-        method=auto
-
-        [ipv6]
-        method=auto
-        addr-gen-mode=stable-privacy
-        ip6-privacy=2
-      '';
-      mode = "0600";
-    };
-    
-    systemd.services.xmm7360-init = {
-      description = "Initialize XMM7360 cellular modem";
-      after = [ "multi-user.target" ];
+    # Systemd service for automatic connection
+    systemd.services.xmm7360-cellular = mkIf cfg.autoStart {
+      description = "XMM7360 Cellular Connection";
+      after = [ "network.target" ];
+      wants = [ "network.target" ];
       wantedBy = [ "multi-user.target" ];
+      
       serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        ExecStart = pkgs.writeShellScript "xmm7360-init" ''
-          for i in {1..30}; do
-            if [ -c /dev/ttyXMM0 ]; then
-              echo "XMM7360 device found"
-              break
-            fi
-            sleep 1
-          done
-          
-          if [ -c /dev/ttyXMM0 ]; then
-            echo "Initializing modem..."
-            exit 0
-          else
-            echo "XMM7360 device not found after 30 seconds"
-            exit 1
-          fi
-        '';
+        Type = "forking";
+        ExecStart = "${cfg.package}/bin/xmm7360-connect --daemon";
+        ExecStop = "${pkgs.procps}/bin/pkill -f xmm7360";
+        Restart = "on-failure";
+        RestartSec = "10s";
+        User = "root";
+        
+        # Security settings
+        NoNewPrivileges = true;
+        ProtectSystem = "strict";
+        ProtectHome = true;
+        ReadWritePaths = [ "/var/lib/xmm7360" "/dev" "/sys" ];
       };
+      
+      preStart = ''
+        # Ensure the module is loaded
+        ${pkgs.kmod}/bin/modprobe xmm7360 || true
+        
+        # Wait for device to be ready
+        for i in {1..30}; do
+          if [ -e /dev/wwan0at0 ] || [ -e /dev/wwan0xmmrpc0 ]; then
+            break
+          fi
+          sleep 1
+        done
+      '';
     };
+
+    # NetworkManager integration
+    networking.networkmanager.enable = mkDefault true;
+    
+    # Add users to networkmanager group for device access
+    users.groups.networkmanager = {};
   };
 }

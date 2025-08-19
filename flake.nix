@@ -11,9 +11,9 @@
     let
       system = "x86_64-linux";
     in {
-      # WWAN special setup - FIXED: Added linuxPackages for kernel access
-      packages.x86_64-linux.xmm7360-pci = nixpkgs.legacyPackages.x86_64-linux.linuxPackages.callPackage ./pkgs/xmm7360-pci {};
-      nixosModules.xmm7360 = import ./modules/xmm7360.nix;
+      # Cellular modem support
+      packages.x86_64-linux.xmm7360-pci-spat = nixpkgs.legacyPackages.x86_64-linux.linuxPackages.callPackage ./pkgs/xmm7360-pci-spat {};
+      nixosModules.xmm7360-cellular = import ./modules/hardware/xmm7360.nix;
 
       nixosConfigurations = {
         lenovop14s = nixpkgs.lib.nixosSystem {
@@ -23,7 +23,7 @@
             ./targets/lenovop14s/device-specific.nix
             ./targets/lenovop14s/hardware-configuration.nix
             home-manager.nixosModules.home-manager
-            self.nixosModules.xmm7360
+            self.nixosModules.xmm7360-cellular
           ];
         };
 

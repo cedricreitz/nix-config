@@ -4,9 +4,10 @@
   environment.systemPackages = with pkgs; [
     brightnessctl
   ];
-  services.xmm7360 = {
+  hardware.cellular.xmm7360 = {
     enable = true;
     apn = "internet";
-    autoConnect = true;
+    autoStart = false;
+    metric = 700;
   };
 }
