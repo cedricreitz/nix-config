@@ -1,14 +1,18 @@
 { config, pkgs, lib, ... }:
+let
+  modemmanagerOverlay = import ./modemmanager-overlay.nix;
+in
 {
 
   networking.hostName = "lenovop14s";
   environment.systemPackages = with pkgs; [
     brightnessctl
+    modemmanager
   ];
-  hardware.cellular.xmm7360 = {
+
+  nixpkgs.overlays = [ modemmanagerOverlay ];
+  systemd.services.modemmanager = {
     enable = true;
-    apn = "internet";
-    autoStart = false;
-    metric = 700;
+    wantedBy = [ "multi-user.target" ];
   };
 }

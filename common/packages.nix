@@ -46,9 +46,6 @@
 
         #generics
         python3Packages.python
-        python3Packages.pyserial
-        python3Packages.configargparse
-        python3Packages.pyroute2
         unzip
         lzip
 

@@ -11,7 +11,6 @@
     let
       system = "x86_64-linux";
     in {
-      nixosModules.xmm7360-cellular = import ./modules/hardware/xmm7360.nix;
 
       nixosConfigurations = {
         lenovop14s = nixpkgs.lib.nixosSystem {
@@ -21,7 +20,6 @@
             ./targets/lenovop14s/device-specific.nix
             ./targets/lenovop14s/hardware-configuration.nix
             home-manager.nixosModules.home-manager
-            self.nixosModules.xmm7360-cellular
           ];
         };
 
