@@ -6,8 +6,8 @@
       ./home.nix
     ];
   system.stateVersion = "25.05";
-    
   boot = {
+    loader.systemd-boot.configurationLimit = 5;
     initrd.systemd.enable = true;
     kernelPackages = pkgs.linuxPackages_zen;
     plymouth = {
