@@ -11,8 +11,8 @@
     let
       system = "x86_64-linux";
     in {
-      # WWAN special setup
-      packages.x86_64-linux.xmm7360-pci = nixpkgs.legacyPackages.x86_64-linux.callPackage ./pkgs/xmm7360-pci {};
+      # WWAN special setup - FIXED: Added linuxPackages for kernel access
+      packages.x86_64-linux.xmm7360-pci = nixpkgs.legacyPackages.x86_64-linux.linuxPackages.callPackage ./pkgs/xmm7360-pci {};
       nixosModules.xmm7360 = import ./modules/xmm7360.nix;
 
       nixosConfigurations = {

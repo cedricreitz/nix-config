@@ -1,0 +1,33 @@
+--- a/xmm7360.c
++++ b/xmm7360.c
+@@ -1278,7 +1278,7 @@ static int xmm7360_tty_chars_in_buffer(struct tty_struct *tty)
+ 	return 0;
+ }
+ 
+-static int xmm7360_tty_write(struct tty_struct *tty, const unsigned char *buffer, int count)
++static ssize_t xmm7360_tty_write(struct tty_struct *tty, const u8 *buffer, size_t count)
+ {
+ 	struct xmm7360_port *port = tty->driver_data;
+ 	struct xmm7360_dev *xmm = port->xmm;
+@@ -1286,7 +1286,7 @@ static int xmm7360_tty_write(struct tty_struct *tty, const unsigned char *buffe
+ 	int ret;
+ 
+ 	if (count == 0)
+-		return count;
++		return (ssize_t)count;
+ 
+ 	if (!test_bit(XMM7360_FLAG_STARTED, &xmm->flags))
+ 		return -ENODEV;
+@@ -1294,10 +1294,10 @@ static int xmm7360_tty_write(struct tty_struct *tty, const unsigned char *buffe
+ 	ret = xmm7360_qp_can_write(&xmm->qp[port->num]);
+ 	if (ret <= 0)
+ 		return ret;
+-	if (ret > count)
++	if (ret > (int)count)
+ 		ret = count;
+ 
+-	return xmm7360_qp_write(&xmm->qp[port->num], buffer, ret, 0);
++	return (ssize_t)xmm7360_qp_write(&xmm->qp[port->num], buffer, ret, 0);
+ }
+ 
+ static unsigned int xmm7360_tty_write_room(struct tty_struct *tty)

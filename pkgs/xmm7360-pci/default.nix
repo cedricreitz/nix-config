@@ -8,8 +8,11 @@ stdenv.mkDerivation rec {
     owner = "xmm7360";
     repo = "xmm7360-pci";
     rev = "master";
-    sha256 = "1aals95hk76rgd21rknqc9qfjva6g6gwicw6wz19m20bn08bs2f3";
+    sha256 = "sha256-wwm9ELALiJrC54azyJ95Rm3pcGLYzhxEe9mcCUvSVKk=";
   };
+
+  # Add the patch for kernel 6.12 compatibility
+  patches = [ ./kernel-6.12-compat.patch ];
 
   nativeBuildInputs = [ kmod ];
   buildInputs = [ kernel.dev ];
