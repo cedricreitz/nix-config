@@ -1,4 +1,4 @@
-{ lib, stdenv, fetchFromGitHub, kernel, kmod, python3Packages }:
+{ lib, stdenv, fetchFromGitHub, kernel, kmod, python3Packages, linuxPackages }:
 
 stdenv.mkDerivation rec {
   pname = "xmm7360-pci-spat";
@@ -8,16 +8,25 @@ stdenv.mkDerivation rec {
     owner = "SimPilotAdamT";
     repo = "xmm7360-pci-spat";
     rev = "master";
-    sha256 = "sha256-T+yJqHzf5gj8r/z4MrN+ZBDr2kfUNEVZEf3eFvGcJKg="; # Update with: nix-prefetch-url --unpack https://github.com/SimPilotAdamT/xmm7360-pci-spat/archive/master.tar.gz
+    sha256 = "sha256-T+yJqHzf5gj8r/z4MrN+ZBDr2kfUNEVZEf3eFvGcJKg="; # The hash you got earlier
   };
 
   nativeBuildInputs = [ kmod ];
-  buildInputs = [ kernel.dev python3Packages.python python3Packages.pyserial ];
+  buildInputs = [ kernel.dev python3Packages.python python3Packages.pyserial python3Packages.configargparse ];
 
-  # The SPAT fork should already have kernel 6.12+ compatibility
-  # but add fallback fixes just in case
   postPatch = ''
-    # Make configuration more generic if sample exists
+    # Add kernel version compatibility header
+    sed -i '1i#include <linux/version.h>' xmm7360.c
+    
+    # Fix hrtimer API for kernel 6.16+
+    # Fix hrtimer API for kernel 6.16+
+    sed -i '/hrtimer_init(&xn->deadline, CLOCK_MONOTONIC, HRTIMER_MODE_REL);/c\
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6,16,0)\
+\thrtimer_setup(&xn->deadline, xmm7360_net_deadline_cb, CLOCK_MONOTONIC, HRTIMER_MODE_REL);\
+#else\
+\thrtimer_init(&xn->deadline, CLOCK_MONOTONIC, HRTIMER_MODE_REL);\
+\txn->deadline.function = xmm7360_net_deadline_cb;\
+#endif' xmm7360.c
     if [ -f xmm7360.ini.sample ]; then
       substituteInPlace xmm7360.ini.sample \
         --replace "o2.internet" "internet" \
@@ -54,48 +63,9 @@ stdenv.mkDerivation rec {
       cp xmm7360.ini.sample $out/etc/xmm7360/xmm7360.ini.example
     fi
     
-    # Create wrapper scripts for the Python tools
+    # Create wrapper scripts
     mkdir -p $out/bin
     
-    # Main connection script
-    cat > $out/bin/xmm7360-connect << 'EOF'
-#!/usr/bin/env bash
-set -e
-
-SCRIPT_DIR="$out/lib/xmm7360-spat"
-CONFIG_DIR="/etc/xmm7360"
-USER_CONFIG_DIR="$HOME/.config/xmm7360"
-
-# Check for configuration
-if [ -f "$USER_CONFIG_DIR/xmm7360.ini" ]; then
-    CONFIG_FILE="$USER_CONFIG_DIR/xmm7360.ini"
-elif [ -f "$CONFIG_DIR/xmm7360.ini" ]; then
-    CONFIG_FILE="$CONFIG_DIR/xmm7360.ini"
-else
-    echo "No configuration file found. Please create one at:"
-    echo "  $USER_CONFIG_DIR/xmm7360.ini or $CONFIG_DIR/xmm7360.ini"
-    echo "Use $out/etc/xmm7360/xmm7360.ini.example as a template"
-    exit 1
-fi
-
-export PYTHONPATH="$SCRIPT_DIR:$PYTHONPATH"
-cd "$SCRIPT_DIR"
-
-echo "Starting XMM7360 cellular connection..."
-exec ${python3Packages.python}/bin/python3 "$SCRIPT_DIR/xmm7360.py" "$@"
-EOF
-    chmod +x $out/bin/xmm7360-connect
-    
-    # RPC utility script
-    cat > $out/bin/xmm7360-rpc << 'EOF'
-#!/usr/bin/env bash
-SCRIPT_DIR="$out/lib/xmm7360-spat"
-export PYTHONPATH="$SCRIPT_DIR:$PYTHONPATH"
-exec ${python3Packages.python}/bin/python3 "$SCRIPT_DIR/rpc/rpc.py" "$@"
-EOF
-    chmod +x $out/bin/xmm7360-rpc
-    
-    # Status check script
     cat > $out/bin/xmm7360-status << 'EOF'
 #!/usr/bin/env bash
 echo "=== XMM7360 Cellular Modem Status ==="
@@ -140,14 +110,6 @@ EOF
 
   meta = with lib; {
     description = "PCI driver for Fibocom L850-GL / Intel XMM7360 cellular modem (SPAT fork with kernel 6.12+ support)";
-    longDescription = ''
-      This is a maintained fork of the xmm7360-pci driver that provides support for
-      Intel XMM7360-based cellular modems (like Fibocom L850-GL) on newer Linux kernels.
-      
-      The SPAT (SimPilotAdamT) fork includes fixes for kernel 6.12+ compatibility and
-      improved stability. It supports any cellular provider - just configure your APN
-      in the configuration file.
-    '';
     homepage = "https://github.com/SimPilotAdamT/xmm7360-pci-spat";
     license = licenses.gpl2Only;
     platforms = platforms.linux;

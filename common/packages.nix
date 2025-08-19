@@ -44,9 +44,11 @@
         fastfetch
 
         #generics
+        python3Packages.python python3Packages.pyserial python3Packages.configargparse
         python313
         python313Packages.pyroute2
         python313Packages.configargparse
+        python313Packages.pyserial
         unzip
         lzip
 

@@ -11,8 +11,6 @@
     let
       system = "x86_64-linux";
     in {
-      # Cellular modem support
-      packages.x86_64-linux.xmm7360-pci-spat = nixpkgs.legacyPackages.x86_64-linux.linuxPackages.callPackage ./pkgs/xmm7360-pci-spat {};
       nixosModules.xmm7360-cellular = import ./modules/hardware/xmm7360.nix;
 
       nixosConfigurations = {

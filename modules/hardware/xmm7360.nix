@@ -5,6 +5,12 @@ with lib;
 let
   cfg = config.hardware.cellular.xmm7360;
   
+  # Build the package using the system's kernel
+  xmm7360-package = pkgs.callPackage ../../pkgs/xmm7360-pci-spat {
+    kernel = config.boot.kernelPackages.kernel;
+    linuxPackages = config.boot.kernelPackages;
+  };
+  
   configFile = pkgs.writeText "xmm7360.ini" ''
 [xmm7360]
 apn=${cfg.apn}
@@ -26,7 +32,7 @@ in {
 
     package = mkOption {
       type = types.package;
-      default = pkgs.xmm7360-pci-spat;
+      default = xmm7360-package;
       description = "The xmm7360-pci-spat package to use";
     };
 
@@ -103,42 +109,6 @@ in {
       # Auto-load module when device is detected
       ACTION=="add", SUBSYSTEM=="pci", ATTR{vendor}=="0x8086", ATTR{device}=="0x7360", RUN+="${pkgs.kmod}/bin/modprobe xmm7360"
     '';
-
-    # Systemd service for automatic connection
-    systemd.services.xmm7360-cellular = mkIf cfg.autoStart {
-      description = "XMM7360 Cellular Connection";
-      after = [ "network.target" ];
-      wants = [ "network.target" ];
-      wantedBy = [ "multi-user.target" ];
-      
-      serviceConfig = {
-        Type = "forking";
-        ExecStart = "${cfg.package}/bin/xmm7360-connect --daemon";
-        ExecStop = "${pkgs.procps}/bin/pkill -f xmm7360";
-        Restart = "on-failure";
-        RestartSec = "10s";
-        User = "root";
-        
-        # Security settings
-        NoNewPrivileges = true;
-        ProtectSystem = "strict";
-        ProtectHome = true;
-        ReadWritePaths = [ "/var/lib/xmm7360" "/dev" "/sys" ];
-      };
-      
-      preStart = ''
-        # Ensure the module is loaded
-        ${pkgs.kmod}/bin/modprobe xmm7360 || true
-        
-        # Wait for device to be ready
-        for i in {1..30}; do
-          if [ -e /dev/wwan0at0 ] || [ -e /dev/wwan0xmmrpc0 ]; then
-            break
-          fi
-          sleep 1
-        done
-      '';
-    };
 
     # NetworkManager integration
     networking.networkmanager.enable = mkDefault true;
