@@ -7,6 +7,7 @@
         "vscode"
         "google-chrome"
         "discord"
+        "trezor-suite"
     ];
     environment.systemPackages = with pkgs; [
         #desktop experience
@@ -54,5 +55,6 @@
         discord
         google-chrome
         waydroid
+        trezor-suite
     ];
 }
